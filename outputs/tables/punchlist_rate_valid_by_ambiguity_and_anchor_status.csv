@@ -1,0 +1,7 @@
+dept_label_quality,anchor_status,n,punchlist_rate
+ambiguous,both_present,263,0.22433460076045628
+ambiguous,none_present,36,0.8055555555555556
+ambiguous,one_present,196,0.44387755102040816
+unambiguous,both_present,546,0.15934065934065933
+unambiguous,none_present,89,0.9213483146067416
+unambiguous,one_present,462,0.29004329004329005
