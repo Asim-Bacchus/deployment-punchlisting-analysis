@@ -13,6 +13,8 @@ Using a simulation grounded in real field workflows (2,000 synthetic deployment 
 
 The central finding: requiring just **one reliable anchor** per ticket, either a specific physical location or a human contact who can help on arrival, dramatically reduces punchlisting without needing to overhaul anything else.
 
+**Stack:** Python, pandas, NumPy, statsmodels, matplotlib
+
 ---
 
 ## Thesis Visualization
@@ -69,7 +71,7 @@ To go beyond rates and understand which missing information actually drives punc
 
 **Pseudo R-squared: 0.14**
 
-This is lower than you would see in a clean predictive model, but appropriate here. Operational systems have inherent noise that no amount of better ticketing can eliminate. The model is not trying to predict every outcome perfectly, it is trying to quantify the drivers that are actually actionable.
+This is lower than you would see in a clean predictive model, but it is appropriate here. The simulation itself encodes an irreducible noise floor through the `execution_constraint` variable, which contributes to punchlisting independently of any information quality improvements. A model fit on data with intentional intrinsic variance should not be expected to explain all outcome variation, and one that did would likely be overfitting to noise rather than signal. The goal is to quantify the drivers that are actually actionable, not to predict every ticket outcome.
 
 Key takeaways:
 
@@ -186,8 +188,7 @@ deployment-punchlisting-analysis/
 
 ## Limitations
 
-- Simulated data cannot capture full behavioral variability. An unresponsive contact, for example, would appear as "human anchor present" in the data but still cause punchlisting in practice.
-- Findings are explanatory, not predictive. The model quantifies drivers, it does not forecast individual ticket outcomes.
-- The counterfactual assumes anchor compliance is enforceable upstream, which depends on the ticketing system and team workflow.
-- No temporal or technician-level variation is modeled. Day-of-week effects, shift patterns, and individual technician experience are all real factors not captured here.
-
+- Simulated data cannot capture full behavioral variability. An unresponsive contact, for example, would appear as "human anchor present" in the data but still cause punchlisting in practice. This means the true impact of the human anchor variable is likely understated, and the counterfactual reduction estimate is conservative for this reason as well.
+- Findings are explanatory, not predictive. The model quantifies which information gaps drive punchlisting, but it should not be used to forecast whether any individual ticket will be punchlisted.
+- The counterfactual assumes anchor compliance is enforceable upstream, which depends on the ticketing system and team workflow. In environments where submitters routinely skip fields, the policy impact would require enforcement mechanisms beyond the rule itself.
+- No temporal or technician-level variation is modeled. Day-of-week effects, shift patterns, and individual technician experience are all real factors not captured here. A production version of this analysis would want random effects for technician to isolate information quality from individual performance.
