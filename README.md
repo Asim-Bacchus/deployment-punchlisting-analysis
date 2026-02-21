@@ -1,179 +1,137 @@
-Healthcare IT Deployment: Preventable Punchlisting Analysis
+# Healthcare IT Deployment: Preventable Punchlisting Analysis
 
-In large healthcare IT rollouts, deployment tickets routinely arrive with incomplete location and contact data. As a result, punchlisting — the inability to complete a deployment in a single visit — is treated as operationally normal.
+In large healthcare IT rollouts, deployment tickets routinely arrive with incomplete location and contact data. As a result, **punchlisting** — the inability to complete a deployment in a single visit — is treated as operationally normal. This project asks a narrower question: **in a system where punchlisting is expected, what portion of it is structurally preventable through minimum viable information?**
 
-This project asks a narrower question:
+Using a structured simulation grounded in real field workflows (2,000 synthetic deployment tickets), the analysis separates **intrinsic punchlisting** (unavoidable execution constraints) from **preventable punchlisting** (failures caused by missing upstream information). The central finding: requiring just one reliable anchor — either a specific location or a human contact — reduces punchlisting dramatically, without requiring perfect data.
 
-In a system where punchlisting is expected, what portion of it is structurally preventable through minimum viable information?
+---
 
-Using a structured simulation grounded in real field workflows (2,000 synthetic deployment tickets), this analysis separates:
+![Punchlisting rate by anchor availability](outputs/figures/thesis_anchor_status_punchlist_rate.png)
 
-Intrinsic punchlisting — unavoidable execution constraints (locked rooms, workstations in use, patient present)
+---
 
-Preventable punchlisting — failures caused by insufficient upstream information
+## Key Findings
 
-The central finding: requiring just one reliable anchor — either a specific physical location or a human contact — dramatically reduces punchlisting without requiring perfect upstream data.
+| Condition | Punchlisting Rate |
+|---|---|
+| Both anchors present | ~19% |
+| One anchor present | ~33% |
+| **No anchors present** | **90.2%** |
+| Overall (valid targets) | 33.5% |
 
-Thesis Visualization
+**Logistic regression** (statsmodels, valid targets only, reference = specific location + contact present):
 
-Key Findings (Valid Deployments Only)
-Condition	Punchlisting Rate
-Both anchors present	19%
-One anchor present	33%
-No anchors present	90.2%
-Overall	33.5%
+| Predictor | Odds Ratio | Interpretation |
+|---|---|---|
+| Spatial anchor missing | **6.32×** | Preventable |
+| Spatial anchor vague | 2.32× | Preventable |
+| Human contact absent | **3.26×** | Preventable |
+| Execution constraint | 4.78× | Intrinsic — unavoidable |
 
-When both spatial and human anchors are missing, punchlisting becomes structurally likely.
+**Counterfactual:** Enforcing a Minimum Anchor Rule (≥1 anchor required) would avoid an estimated **~87 revisits per 2,000 valid deployments — a 13% reduction** — without requiring perfect upstream data.
 
-Driver Quantification (Logistic Regression)
+---
 
-Logistic regression was fit using statsmodels on valid deployments only.
+## The Core Distinction
 
-Reference category: specific location + human contact present
+| Type | Cause | Fixable via better ticketing? |
+|---|---|---|
+| **Intrinsic** | Workstation in use, locked room, patient present | No |
+| **Preventable** | Missing location, no contact, ambiguous dept label | Yes |
 
-Predictor	Odds Ratio	Interpretation
-Spatial anchor missing	6.32×	Preventable driver
-Spatial anchor vague	2.32×	Preventable driver
-Human contact absent	3.26×	Preventable driver
-Execution constraint	4.78×	Intrinsic — unavoidable
+This distinction is encoded structurally in the simulation. `execution_constraint` affects punchlisting probability regardless of anchor quality (intrinsic noise). Anchor and ambiguity variables layer on top of that baseline (preventable signal). The goal is not to eliminate punchlisting — it's to identify the portion that better ticketing can actually fix.
 
-Pseudo R²: 0.14
+> There exists a minimum viable information threshold below which human judgment fails to scale.
 
-Appropriate for noisy operational systems where intrinsic variability is expected.
+---
 
-Interpretation:
+## Recommendation
 
-Missing spatial information multiplies punchlisting odds by over 6×.
+**Minimum Anchor Rule** — Require deployment tickets to include at least one of:
+- A specific physical location
+- A designated human point of contact
 
-Lack of a human contact more than triples odds.
-
-Intrinsic execution constraints significantly increase failure risk — confirming that some punchlisting is structurally unavoidable.
-
-Counterfactual: Minimum Anchor Rule
-
-A conservative counterfactual was computed:
-
-If all valid deployment tickets satisfied a Minimum Anchor Rule (at least one anchor required), non-compliant tickets were assumed to perform at the current compliant-ticket punchlisting rate.
-
-This assumption:
-
-Does not eliminate intrinsic constraints
-
-Does not assume perfect data
-
-Does not assume behavioral change
-
-Estimated impact:
-
-~87 revisits avoided per 2,000 valid deployments (~13% reduction)
-
-This represents downstream labor savings without redesigning the entire workflow.
-
-The Core Distinction
-Type	Cause	Fixable via Better Ticketing?
-Intrinsic	Workstation in use, locked room, patient present	No
-Preventable	Missing location, no contact, ambiguous department label	Yes
-
-This distinction is encoded structurally in the simulation:
-
-execution_constraint affects punchlisting probability independently of anchor quality (intrinsic noise).
-
-Anchor and ambiguity variables layer on top of that baseline (preventable signal).
-
-The goal is not to eliminate punchlisting — it is to quantify the portion that better ticketing can realistically fix.
-
-There exists a minimum viable information threshold below which human judgment fails to scale.
-
-Recommendation
-Minimum Anchor Rule
-
-Require deployment tickets to include at least one of:
-
-A specific physical location
-
-A designated human point of contact
-
-Perfect information is unnecessary. However, when both anchors are missing, failure becomes structurally predictable.
+Perfect information is unnecessary. But when both anchors are missing, failure becomes structurally likely. This is a low-cost upstream intervention that reduces downstream rework without redesigning the entire workflow.
 
 Supporting recommendations:
+- Replace free-text department descriptions with structured location fields
+- When no anchor exists, begin by coordinating with a department manager before attempting deployment
 
-Replace free-text department descriptions with structured location fields
+---
 
-When no anchor exists, coordinate with a department manager before dispatching a technician
-
-Operational Context
+## Operational Context
 
 This analysis models a real healthcare IT deployment workflow:
+- Ticketing system modeled after FileMaker, with ~40% upstream data accuracy
+- Field technicians deploying peripherals (tap badges, signature pads) across large hospital departments
+- Leadership explicitly acknowledged low data quality; punchlisting was treated as operationally normal
 
-Ticketing system similar to FileMaker (~40% upstream data accuracy)
+The simulation is grounded in observed failure patterns, not randomized. Key co-occurrences are preserved: missing inventory records tend to co-occur with missing contact and location data, and ambiguous department labels correlate with degraded spatial specificity.
 
-Field technicians deploying peripherals across large hospital departments
+---
 
-Leadership acknowledgment that punchlisting was operationally normal
+## Data Design
 
-The simulation preserves structural co-occurrences observed in practice:
+2,000 synthetic deployment tickets. Each row represents one ticket.
 
-Missing inventory data co-occurs with missing contact/location data
+| Variable | Values | Notes |
+|---|---|---|
+| `task_applicability` | valid_target / invalid_target | Invalid targets excluded from primary analysis |
+| `spatial_anchor` | specific / vague / missing | Core predictor |
+| `human_anchor` | present / absent | Core predictor |
+| `dept_label_quality` | unambiguous / ambiguous | Degrades spatial specificity slightly |
+| `execution_constraint` | 0 / 1 | Intrinsic blocker — ~12% of tickets |
+| `punchlisted` | 0 / 1 | Primary outcome |
+| `revisit_required` | 0 / 1 | Probabilistic — 80% of punchlisted tickets |
+| `revisit_successful` | yes / no / resolved_admin | 20% resolved administratively, no revisit |
 
-Ambiguous department labels degrade spatial specificity
+---
 
-Intrinsic constraints operate independently of information quality
+## Methodology
 
-This is not randomized data — it is logically structured.
+**Descriptive analysis** — punchlisting rates by anchor availability, department label quality, and task applicability.
 
-Data Design
+**Logistic regression** — fit on valid targets only using `spatial_anchor`, `human_anchor`, `dept_label_quality`, and `execution_constraint`. Statsmodels used for odds ratios and 95% confidence intervals. This is an explanatory model, not a predictive optimization exercise. Pseudo R² of 0.14 is appropriate for noisy operational data where intrinsic variability is expected.
 
-2,000 synthetic deployment tickets.
+**Counterfactual simulation** — if all valid tickets satisfied the Minimum Anchor Rule, non-compliant tickets are assumed to perform at the current compliant-ticket rate. This assumption does not eliminate intrinsic constraints, does not assume perfect data, and does not assume behavioral changes. It is a conservative lower bound.
 
-Variable	Description
-task_applicability	valid_target / invalid_target (analysis focuses on valid)
-spatial_anchor	specific / vague / missing
-human_anchor	present / absent
-dept_label_quality	ambiguous / unambiguous
-execution_constraint	intrinsic blocker (~12% baseline)
-punchlisted	binary outcome
-revisit_required	probabilistic — ~80% of punchlisted generate revisit
-revisit_successful	yes / no / resolved_admin
-Methodology
+---
 
-Descriptive analysis
-Punchlisting rates analyzed by anchor availability and department label quality.
+## How to Reproduce
 
-Logistic regression (statsmodels)
-Model fit on valid targets using:
-
-spatial_anchor
-
-human_anchor
-
-dept_label_quality
-
-execution_constraint
-
-This is an explanatory model focused on effect size and interpretability, not predictive optimization.
-
-Counterfactual simulation
-Non-compliant tickets assumed to reach the compliant-ticket punchlisting rate under policy enforcement. This produces a conservative lower-bound estimate.
-
-Reproducing the Analysis
+```bash
 pip install -r requirements.txt
-python src/generate_data.py
-python src/analyze.py
+python src/generate_data.py   # generates data/raw/tickets.csv
+python src/analyze.py         # outputs figures, tables, summary.json
+```
 
-Outputs written to:
+---
 
-outputs/figures/
+## Project Structure
 
-outputs/tables/
+```
+deployment-punchlisting-analysis/
+├── src/
+│   ├── config.py           # all parameters and base rates
+│   ├── generate_data.py    # simulation with labeled intrinsic/preventable score components
+│   ├── analyze.py          # rates, figures, logistic regression, counterfactual
+│   └── utils.py            # shared helpers
+├── data/raw/tickets.csv
+├── outputs/
+│   ├── figures/
+│   ├── tables/
+│   └── summary.json
+├── requirements.txt
+└── README.md
+```
 
-outputs/summary.json
+---
 
-Limitations
+## Limitations
 
-Simulated data cannot capture full behavioral variability (e.g., unresponsive contacts)
+- Simulated data cannot capture full behavioral variability — unresponsive contacts appear as "human anchor present" but still cause punchlisting
+- Findings are directional and explanatory, not predictive
+- Counterfactual assumes anchor compliance is enforceable upstream
+- No temporal or technician-level variation modeled
 
-Findings are explanatory, not predictive
 
-Counterfactual assumes anchor compliance is enforceable upstream
-
-No temporal or technician-level variation modeled
