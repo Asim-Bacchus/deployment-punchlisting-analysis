@@ -1,7 +1,7 @@
-spatial_anchor,human_anchor,n,punchlist_rate
-missing,absent,125,0.888
-missing,present,183,0.3442622950819672
-specific,absent,231,0.2510822510822511
-specific,present,379,0.10554089709762533
-vague,absent,244,0.4098360655737705
-vague,present,430,0.24651162790697675
+spatial_anchor,human_anchor,punchlist_rate,n
+missing,absent,0.9016393442622951,122
+missing,present,0.3488372093023256,215
+specific,absent,0.2787878787878788,165
+specific,present,0.15217391304347827,322
+vague,absent,0.4522058823529412,272
+vague,present,0.27631578947368424,608

@@ -1,0 +1,21 @@
+{
+  "headline": {
+    "overall_valid_punchlist_rate": 0.335,
+    "both_anchors_missing_rate": 0.902,
+    "at_least_one_anchor_rate": 0.291,
+    "ambiguity_lift_weak_anchor_subset": 0.085
+  },
+  "logistic_regression": {
+    "spatial_missing_OR": 6.32,
+    "spatial_vague_OR": 2.32,
+    "human_absent_OR": 3.26,
+    "execution_constraint_OR": 4.78
+  },
+  "counterfactual": {
+    "current_punchlist_rate_valid": 0.335,
+    "compliant_punchlist_rate": 0.291,
+    "non_compliant_punchlist_rate": 0.902,
+    "tickets_avoided_per_2000": 87,
+    "relative_reduction_pct": 13.0
+  }
+}
