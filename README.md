@@ -27,10 +27,10 @@ Deployments flagged as invalid targets (devices that turned out not to need work
 
 | Condition | Punchlisting Rate |
 |---|---|
-| Both anchors present | 19% |
-| One anchor present | 33% |
+| Both anchors present | 23% |
+| One anchor present | 37% |
 | **No anchors present** | **90.2%** |
-| Overall | 33.5% |
+| Overall | 34% |
 
 When both a location and a human contact are missing from a ticket, punchlisting stops being a risk and starts being the expected outcome.
 
@@ -190,3 +190,4 @@ deployment-punchlisting-analysis/
 - Findings are explanatory, not predictive. The model quantifies drivers, it does not forecast individual ticket outcomes.
 - The counterfactual assumes anchor compliance is enforceable upstream, which depends on the ticketing system and team workflow.
 - No temporal or technician-level variation is modeled. Day-of-week effects, shift patterns, and individual technician experience are all real factors not captured here.
+
